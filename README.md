@@ -2,8 +2,8 @@
 
 ![UGREEN NAS Jellyfin Migration](Screens/Jellyfin-Migration.png)
 
-Der **UGREEN NAS Jellyfin Migration** ist ein leichtgewichtiges Migrationspaket für UGREEN NAS Systeme mit UGOS.  
-Das Tool migriert eine bestehende UGREEN App Center Jellyfin-Installation in ein normales Docker-Projekt und übernimmt dabei Konfiguration, Cache, Plugins und Medienpfade.
+Das **UGREEN NAS Jellyfin Migration Tool** ist ein leichtgewichtiges Migrationspaket für UGREEN NAS Systeme mit UGOS.  
+Es migriert eine bestehende UGREEN App Center Jellyfin-Installation in ein normales Docker-Projekt und übernimmt dabei Konfiguration, Cache, Plugins und Medienpfade.
 
 Das Ziel ist eine möglichst einfache und sichere Migration: Backup erstellen, alte UGREEN-Jellyfin-App stoppen, neues Docker-Projekt erzeugen und Jellyfin anschließend über die UGOS Docker-App weiter betreiben.
 
@@ -32,7 +32,7 @@ UGREEN-NAS-Jellyfin-Migration/
 |- README.md
 |- Screens/
 |  |- Jellyfin-Migration.png
-|  |- Jellyfin-Migration1280.png
+|  |- Jellyfin-Migration1280.jpg
 |  `- Jellyfin-MigrationEN.png
 `- Release-Paket:
    |- UGREEN-NAS-Jellyfin-Migration-v1.0.0.zip
@@ -60,7 +60,7 @@ UGREEN-NAS-Jellyfin-Migration-v1.0.0/
 ```
 
 4. SSH in UGOS aktivieren.
-5. Per PuTTY oder einem anderen SSH-Client mit der NAS verbinden.
+5. Per PuTTY oder einem anderen SSH-Client mit dem NAS verbinden.
 6. Root-Rechte holen:
 
 ```bash
@@ -170,10 +170,10 @@ Es beschreibt unter anderem:
 
 - SSH in UGOS aktivieren
 - Verbindung mit PuTTY herstellen
-- Release per SMB auf die NAS kopieren
+- Release per SMB auf das NAS kopieren
 - Prüflauf starten
 - Migration starten
-- Ergebnis in UGOS Docker-App prüfen
+- Ergebnis in der UGOS Docker-App prüfen
 - Jellyfin prüfen
 - alte UGREEN-Jellyfin-App deinstallieren
 
@@ -187,7 +187,7 @@ Releases -> UGREEN-NAS-Jellyfin-Migration-v1.0.0.zip
 
 ## Version
 
-- UGREEN NAS Jellyfin Migration: **v1.0.0**
+- UGREEN NAS Jellyfin Migration Tool: **v1.0.0**
 - Zielsystem: UGREEN NAS mit UGOS
 - Getestet auf: DXP4800PRO
 - Neuer Docker-Projektname: `jellyfin-docker`
@@ -197,7 +197,7 @@ Releases -> UGREEN-NAS-Jellyfin-Migration-v1.0.0.zip
 
 ![UGREEN NAS Jellyfin Migration](Screens/Jellyfin-MigrationEN.png)
 
-The **UGREEN NAS Jellyfin Migration** is a lightweight migration package for UGREEN NAS systems running UGOS.  
+The **UGREEN NAS Jellyfin Migration Tool** is a lightweight migration package for UGREEN NAS systems running UGOS.  
 It migrates an existing UGREEN App Center Jellyfin installation to a normal Docker project and transfers configuration, cache, plugins and media paths.
 
 The goal is a simple and safe migration: create a backup, stop the old UGREEN Jellyfin app, create a new Docker project and continue running Jellyfin through the UGOS Docker app.
@@ -258,9 +258,15 @@ cd /volume1/docker/UGREEN-NAS-Jellyfin-Migration-v1.0.0
 The old UGREEN Jellyfin app is intentionally not removed automatically.  
 After a successful check, uninstall the old app manually in the UGREEN App Center.
 
-## License
+## License and usage
 
-This project is licensed under the **MIT License**.
+This project is licensed under the **PolyForm Noncommercial License 1.0.0**.
+
+- Noncommercial use is allowed
+- Commercial use is not allowed
+- Commercial use requires prior written permission from the author
+
+For commercial use, please contact the author in advance.
 
 ## Copyright
 
