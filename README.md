@@ -5,7 +5,14 @@
 Das **UGREEN NAS Jellyfin Migration Tool** ist ein leichtgewichtiges Migrationspaket für UGREEN NAS Systeme mit UGOS.  
 Es migriert eine bestehende UGREEN App Center Jellyfin-Installation in ein normales Docker-Projekt und übernimmt dabei Konfiguration, Cache, Plugins und Medienpfade.
 
-Das Ziel ist eine möglichst einfache und sichere Migration: Backup erstellen, alte UGREEN-Jellyfin-App stoppen, neues Docker-Projekt erzeugen und Jellyfin anschließend über die UGOS Docker-App weiter betreiben.
+Das Ziel ist eine möglichst einfache und sichere Migration: alte UGREEN-Jellyfin-App stoppen, Backup und Konfigurationskopie bei gestoppter App erstellen, neues Docker-Projekt erzeugen und Jellyfin anschließend über die UGOS Docker-App weiter betreiben.
+
+`SAFE_MIGRATION` und `FULL_MIGRATION` prüfen den Stillstand vor dem Kopieren der
+Jellyfin-Datenbanken. Scheitert dieser Schritt vor dem erfolgreichen Start des
+neuen Containers, werden die ursprüngliche Restart-Policy und der vorherige
+Laufzustand der alten App wiederhergestellt. Ein bereits laufender neuer
+Container verhindert einen konkurrierenden Neustart der alten App.
+`BACKUP_ONLY` bleibt ein Backup der laufenden App und bietet diese Stillstandsgarantie nicht.
 
 > **Hinweis:** Dieses Projekt ist eine Community-Lösung und kein offizielles UGREEN-Produkt. Verwendung auf eigene Verantwortung.
 
@@ -209,7 +216,13 @@ https://github.com/Railsimulatornet/UGREEN-NAS-Jellyfin-Migration/releases/tag/v
 The **UGREEN NAS Jellyfin Migration Tool** is a lightweight migration package for UGREEN NAS systems running UGOS.  
 It migrates an existing UGREEN App Center Jellyfin installation to a normal Docker project and transfers configuration, cache, plugins and media paths.
 
-The goal is a simple and safe migration: create a backup, stop the old UGREEN Jellyfin app, create a new Docker project and continue running Jellyfin through the UGOS Docker app.
+The goal is a simple and safe migration: stop the old UGREEN Jellyfin app, back up and copy its configuration while stopped, create a new Docker project and continue running Jellyfin through the UGOS Docker app.
+
+`SAFE_MIGRATION` and `FULL_MIGRATION` verify that the old app is stopped before
+copying its databases. A failure before the new container starts restores the
+old restart policy and prior running state. An already running new container
+prevents a conflicting restart of the old app. `BACKUP_ONLY` continues to copy
+the running app and does not provide the same guarantee.
 
 > **Note:** This project is a community solution and not an official UGREEN product. Use at your own risk.
 
