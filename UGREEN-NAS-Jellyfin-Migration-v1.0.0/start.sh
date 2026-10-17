@@ -80,6 +80,8 @@ UGOS_DB_BACKUP=""
 POST_START_WARNING="false"
 NAS_ACCESS_IP=""
 UGREEN_OLD_RESTART_POLICY=""
+UGREEN_OLD_WAS_RUNNING="false"
+OLD_APP_MIGRATION_PAUSED="false"
 OLD_APP_STATUS="unknown"
 
 MEDIA_MOUNTS_FILE=""
@@ -306,12 +308,17 @@ setup_workdir() {
 }
 
 cleanup() {
+  local exitcode=$?
+  if [ "$exitcode" -ne 0 ]; then
+    restore_old_app_after_failure
+  fi
   # keep workdir if DEBUG_KEEP_WORKDIR=true
   if ! is_true "${DEBUG_KEEP_WORKDIR:-false}"; then
     rm -rf "$WORK_DIR" 2>/dev/null || true
   else
     echo "DEBUG_KEEP_WORKDIR=true -> $WORK_DIR"
   fi
+  return "$exitcode"
 }
 trap cleanup EXIT
 
@@ -1335,17 +1342,43 @@ post_start_checks() {
 
 stop_old_app_if_needed() {
   if is_true "$STOP_UGREEN_APP"; then
+    UGREEN_OLD_WAS_RUNNING="$(docker inspect "$UGREEN_CONTAINER" --format '{{.State.Running}}' 2>/dev/null || true)"
+    case "$UGREEN_OLD_WAS_RUNNING" in true|false) ;; *) fail "Status der alten UGREEN-App konnte nicht gelesen werden." ;; esac
     UGREEN_OLD_RESTART_POLICY="$(docker inspect "$UGREEN_CONTAINER" --format '{{.HostConfig.RestartPolicy.Name}}' 2>/dev/null || true)"
+    [ -n "$UGREEN_OLD_RESTART_POLICY" ] || fail "Restart-Policy der alten UGREEN-App konnte nicht gelesen werden."
+    if [ "$UGREEN_OLD_RESTART_POLICY" = "on-failure" ]; then
+      local retry_count
+      retry_count="$(docker inspect "$UGREEN_CONTAINER" --format '{{.HostConfig.RestartPolicy.MaximumRetryCount}}' 2>/dev/null || true)"
+      [[ "$retry_count" =~ ^[0-9]+$ ]] || fail "Restart-Policy der alten UGREEN-App ist unvollständig."
+      UGREEN_OLD_RESTART_POLICY="on-failure:${retry_count}"
+    fi
+    OLD_APP_MIGRATION_PAUSED="true"
     if [ -n "$UGREEN_OLD_RESTART_POLICY" ] && [ "$UGREEN_OLD_RESTART_POLICY" != "no" ] && [ "$UGREEN_OLD_RESTART_POLICY" != "" ]; then
       log "$(tr_text "Setze Restart-Policy der alten UGREEN-App vorübergehend auf no: $UGREEN_CONTAINER (vorher: $UGREEN_OLD_RESTART_POLICY)" "Setting old UGREEN app restart policy temporarily to no: $UGREEN_CONTAINER (previously: $UGREEN_OLD_RESTART_POLICY)")"
-      docker update --restart=no "$UGREEN_CONTAINER" >> "$LOG_FILE" 2>&1 || warn "$(tr_text 'Restart-Policy der alten UGREEN-App konnte nicht geändert werden.' 'Could not change restart policy of the old UGREEN app.')"
+      docker update --restart=no "$UGREEN_CONTAINER" >> "$LOG_FILE" 2>&1 || fail "$(tr_text 'Restart-Policy der alten UGREEN-App konnte nicht geändert werden.' 'Could not change restart policy of the old UGREEN app.')"
     fi
     log "$(tr_text "Stoppe alte UGREEN-Jellyfin-App: $UGREEN_CONTAINER" "Stopping old UGREEN Jellyfin app: $UGREEN_CONTAINER")"
     docker stop "$UGREEN_CONTAINER" || fail "Alte UGREEN-App konnte nicht gestoppt werden."
-    verify_old_app_stopped
+    verify_old_app_stopped || fail "$(tr_text 'Die alte App muss vor Backup und Konfigurationskopie nachweislich gestoppt sein.' 'The old app must be confirmed stopped before backup and configuration copy.')"
   else
     fail "STOP_UGREEN_APP=false ist in v0.1 für Migration mit gleichem Port nicht erlaubt."
   fi
+}
+
+restore_old_app_after_failure() {
+  [ "${OLD_APP_MIGRATION_PAUSED:-false}" = "true" ] || return 0
+  [ "${NEW_CONTAINER_STARTED:-false}" != "true" ] || return 0
+  local new_running
+  new_running="$(docker inspect "$JELLYFIN_CONTAINER_NAME" --format '{{.State.Running}}' 2>/dev/null || true)"
+  if [ "$new_running" = "true" ]; then
+    warn "$(tr_text 'Der neue Container läuft bereits; die alte App bleibt zur Vermeidung eines Portkonflikts gestoppt.' 'The new container is already running; the old app remains stopped to avoid a port conflict.')"
+    return 0
+  fi
+  docker update --restart="$UGREEN_OLD_RESTART_POLICY" "$UGREEN_CONTAINER" >> "$LOG_FILE" 2>&1 || warn "$(tr_text 'Ursprüngliche Restart-Policy konnte nicht wiederhergestellt werden.' 'Could not restore the original restart policy.')"
+  if [ "$UGREEN_OLD_WAS_RUNNING" = "true" ]; then
+    docker start "$UGREEN_CONTAINER" >> "$LOG_FILE" 2>&1 || warn "$(tr_text 'Die alte App konnte nach dem Fehler nicht neu gestartet werden.' 'Could not restart the old app after the failure.')"
+  fi
+  OLD_APP_MIGRATION_PAUSED="false"
 }
 
 verify_old_app_stopped() {
@@ -1360,18 +1393,24 @@ verify_old_app_stopped() {
   if [ "$running" = "true" ]; then
     OLD_APP_STATUS="$(tr_text 'läuft noch' 'still running')"
     warn "$(tr_text 'Alte UGREEN-App läuft noch. Bitte nicht beide Jellyfin-Instanzen parallel verwenden.' 'Old UGREEN app is still running. Please do not use both Jellyfin instances in parallel.')"
-  else
+    return 1
+  elif [ "$running" = "false" ]; then
     OLD_APP_STATUS="$(tr_text 'gestoppt' 'stopped')"
     log "$(tr_text "Alte UGREEN-Jellyfin-App ist gestoppt: $UGREEN_CONTAINER" "Old UGREEN Jellyfin app is stopped: $UGREEN_CONTAINER")"
+  else
+    OLD_APP_STATUS="unknown"
+    warn "$(tr_text 'Status der alten UGREEN-App konnte nicht überprüft werden.' 'Could not verify the old UGREEN app state.')"
+    return 1
   fi
+  return 0
 }
 
 start_new_container() {
   log "$(tr_text 'Starte neuen Jellyfin-Container ...' 'Starting new Jellyfin container ...')"
   (cd "$DOCKER_PROJECT_PATH" && "${COMPOSE_CMD[@]}" -p "$COMPOSE_PROJECT_NAME" -f "$DOCKER_PROJECT_PATH/${COMPOSE_FILE_NAME}" up -d) || fail "docker compose up -d fehlgeschlagen."
-  NEW_CONTAINER_STARTED="true"
   sleep 5
   if docker ps --format '{{.Names}}' | grep -qx "$JELLYFIN_CONTAINER_NAME"; then
+    NEW_CONTAINER_STARTED="true"
     log "$(tr_text 'Neuer Jellyfin-Container läuft.' 'New Jellyfin container is running.')"
   else
     warn "$(tr_text 'Neuer Jellyfin-Container scheint nicht zu laufen. Prüfe docker logs.' 'New Jellyfin container does not seem to be running. Check docker logs.')"
@@ -1441,27 +1480,27 @@ execute_mode() {
       log "$(tr_text 'Backup abgeschlossen. Alte UGREEN-App läuft weiter.' 'Backup completed. Old UGREEN app keeps running.')"
       ;;
     safe_migration|safe-migration)
+      stop_old_app_if_needed
       create_backup
       prepare_project
       generate_compose
-      stop_old_app_if_needed
       start_new_container
       register_ugos_project_if_requested
       refresh_ugos_app_if_requested
-      verify_old_app_stopped
+      verify_old_app_stopped || fail "$(tr_text 'Die alte App konnte nach dem UGOS-Refresh nicht gestoppt werden. Migration abgebrochen.' 'The old app could not be stopped after the UGOS refresh. Migration aborted.')"
       verify_ugos_project_registration
       post_start_checks
       copy_reports_to_backup
       ;;
     full_migration|full-migration)
+      stop_old_app_if_needed
       create_backup
       prepare_project
       generate_compose
-      stop_old_app_if_needed
       start_new_container
       register_ugos_project_if_requested
       refresh_ugos_app_if_requested
-      verify_old_app_stopped
+      verify_old_app_stopped || fail "$(tr_text 'Die alte App konnte nach dem UGOS-Refresh nicht gestoppt werden. Migration abgebrochen.' 'The old app could not be stopped after the UGOS refresh. Migration aborted.')"
       verify_ugos_project_registration
       post_start_checks
       remove_old_app_if_allowed
