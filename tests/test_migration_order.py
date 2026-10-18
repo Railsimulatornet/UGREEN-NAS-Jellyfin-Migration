@@ -9,7 +9,7 @@ import unittest
 
 
 REPO = Path(__file__).resolve().parents[1]
-SCRIPT = Path(os.environ.get("JELLYFIN_MIGRATION_SOURCE", REPO / "UGREEN-NAS-Jellyfin-Migration-v1.0.0/start.sh"))
+SCRIPT = Path(os.environ.get("JELLYFIN_MIGRATION_SOURCE", REPO / "UGREEN-NAS-Jellyfin-Migration-v1.0.1/start.sh"))
 SOURCE = SCRIPT.read_text()
 
 
