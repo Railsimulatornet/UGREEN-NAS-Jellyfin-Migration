@@ -1,5 +1,7 @@
 # UGREEN NAS Jellyfin Migration
 
+[![Quality](https://github.com/Railsimulatornet/UGREEN-NAS-Jellyfin-Migration/actions/workflows/quality.yml/badge.svg?branch=main)](https://github.com/Railsimulatornet/UGREEN-NAS-Jellyfin-Migration/actions/workflows/quality.yml)
+
 ![UGREEN NAS Jellyfin Migration](Screens/Jellyfin-Migration.png)
 
 Das **UGREEN NAS Jellyfin Migration Tool** ist ein leichtgewichtiges Migrationspaket für UGREEN NAS Systeme mit UGOS.  
@@ -42,7 +44,7 @@ UGREEN-NAS-Jellyfin-Migration/
 |  |- Jellyfin-Migration1280.jpg
 |  `- Jellyfin-MigrationEN.png
 `- Release:
-   |- UGREEN-NAS-Jellyfin-Migration-v1.0.0.zip
+   |- UGREEN-NAS-Jellyfin-Migration-v1.0.1.zip
    `- UGREEN-NAS-Jellyfin-Migration_Handbuch_DE-EN.pdf
 ```
 
@@ -50,7 +52,7 @@ Das Release enthält das ZIP-Paket und das PDF-Handbuch.
 Der entpackte Migrationsordner enthält:
 
 ```text
-UGREEN-NAS-Jellyfin-Migration-v1.0.0/
+UGREEN-NAS-Jellyfin-Migration-v1.0.1/
 |- .env
 |- LICENSE
 |- start.sh
@@ -59,12 +61,12 @@ UGREEN-NAS-Jellyfin-Migration-v1.0.0/
 
 ## Schnellstart auf einem UGREEN NAS
 
-1. Aktuelles Release herunterladen.
+1. [Aktuelles Release](https://github.com/Railsimulatornet/UGREEN-NAS-Jellyfin-Migration/releases/latest) herunterladen.
 2. ZIP-Datei entpacken.
 3. Den entpackten Ordner auf das NAS kopieren, zum Beispiel nach:
 
 ```text
-/volume1/docker/UGREEN-NAS-Jellyfin-Migration-v1.0.0
+/volume1/docker/UGREEN-NAS-Jellyfin-Migration-v1.0.1
 ```
 
 4. SSH in UGOS aktivieren.
@@ -78,7 +80,7 @@ sudo -i
 7. In den Projektordner wechseln:
 
 ```bash
-cd /volume1/docker/UGREEN-NAS-Jellyfin-Migration-v1.0.0
+cd /volume1/docker/UGREEN-NAS-Jellyfin-Migration-v1.0.1
 ```
 
 8. Optional zuerst einen Prüflauf starten:
@@ -111,9 +113,9 @@ Das Script führt die Migration Schritt für Schritt aus:
 4. vorhandene Medienpfade erkennen
 5. UID/GID für den neuen Jellyfin-Container ermitteln
 6. Medienzugriff im Testcontainer prüfen
-7. Backup der alten UGREEN-Jellyfin-Daten erstellen
-8. neues Docker-Projekt unter `/volumeX/docker/JellyfinDocker` erzeugen
-9. alte UGREEN-Jellyfin-App stoppen
+7. alte UGREEN-Jellyfin-App stoppen und Stillstand prüfen
+8. Backup der alten UGREEN-Jellyfin-Daten erstellen
+9. neues Docker-Projekt unter `/volumeX/docker/JellyfinDocker` erzeugen
 10. neuen Jellyfin-Container starten
 11. Projekt in der UGOS Docker-App registrieren
 12. Docker-App aktualisieren
@@ -190,18 +192,18 @@ Es beschreibt unter anderem:
 Bitte das aktuelle Release über GitHub herunterladen:
 
 ```text
-Releases -> UGREEN-NAS-Jellyfin-Migration-v1.0.0
+Releases -> UGREEN-NAS-Jellyfin-Migration-v1.0.1
 ```
 
 Direkter Release-Link:
 
 ```text
-https://github.com/Railsimulatornet/UGREEN-NAS-Jellyfin-Migration/releases/tag/v1.0.0
+https://github.com/Railsimulatornet/UGREEN-NAS-Jellyfin-Migration/releases/latest
 ```
 
 ## Version
 
-- UGREEN NAS Jellyfin Migration Tool: **v1.0.0**
+- UGREEN NAS Jellyfin Migration Tool: **v1.0.1**
 - Zielsystem: UGREEN NAS mit UGOS
 - Getestet auf: DXP4800PRO
 - Neuer Docker-Projektname: `jellyfin-docker`
@@ -244,12 +246,12 @@ the running app and does not provide the same guarantee.
 
 ### Quick start
 
-1. Download the latest release.
+1. Download the [latest release](https://github.com/Railsimulatornet/UGREEN-NAS-Jellyfin-Migration/releases/latest).
 2. Extract the ZIP file.
 3. Copy the extracted folder to the NAS, for example:
 
 ```text
-/volume1/docker/UGREEN-NAS-Jellyfin-Migration-v1.0.0
+/volume1/docker/UGREEN-NAS-Jellyfin-Migration-v1.0.1
 ```
 
 4. Enable SSH in UGOS.
@@ -263,7 +265,7 @@ sudo -i
 7. Change into the project folder:
 
 ```bash
-cd /volume1/docker/UGREEN-NAS-Jellyfin-Migration-v1.0.0
+cd /volume1/docker/UGREEN-NAS-Jellyfin-Migration-v1.0.1
 ```
 
 8. Optional check-only run:
@@ -288,7 +290,7 @@ After a successful check, uninstall the old app manually in the UGREEN App Cente
 Latest release:
 
 ```text
-https://github.com/Railsimulatornet/UGREEN-NAS-Jellyfin-Migration/releases/tag/v1.0.0
+https://github.com/Railsimulatornet/UGREEN-NAS-Jellyfin-Migration/releases/latest
 ```
 
 ## License

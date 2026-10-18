@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # UGREEN NAS Jellyfin Migration
-# v1.0.0 - first stable community release
+# v1.0.1
 #
 # Copyright (c) 2026 Roman Glos / Railsimulatornet
 # Author: Roman Glos
@@ -14,7 +14,7 @@ export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 SCRIPT_NAME="$(basename "$0")"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SCRIPT_VERSION="1.0.0"
+SCRIPT_VERSION="1.0.1"
 ENV_FILE="${ENV_FILE:-${SCRIPT_DIR}/.env}"
 
 # -----------------------------
