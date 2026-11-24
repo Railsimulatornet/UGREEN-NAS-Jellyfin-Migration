@@ -297,3 +297,6 @@ This project is licensed under the [MIT License](LICENSE).
 
 Copyright © 2026 **Roman Glos / Railsimulatornet**. Community solution, not an official UGREEN product. Use at your own risk.
 
+## Wartung / Maintenance
+
+[MAINTENANCE.md](MAINTENANCE.md) beschreibt die automatischen Prüfungen und Paketupdates. / Automatic checks and package updates are described in [MAINTENANCE.md](MAINTENANCE.md).
